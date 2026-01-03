@@ -1,0 +1,19 @@
+DocTracker: Student Document Management System
+A professional Django-based portal for study-abroad consultancies to manage, track, and verify student documents efficiently.
+🚀 Key Features
+ * Counselor Dashboard: Centralized view of all students with real-time progress tracking.
+ * Secure Student Portal: Password-less, token-based (UUID) access for secure file uploads.
+ * Dynamic Workflows: Automatic status updates from 'Pending' to 'Uploaded'.
+ * Review System: Counselors can verify or reject documents with direct feedback notes.
+ * Responsive Design: Built with Tailwind CSS for mobile and desktop compatibility.
+🛠️ Tech Stack
+ * Backend: Python, Django
+ * Database: PostgreSQL (Production), SQLite (Local)
+ * Frontend: Tailwind CSS, JavaScript
+ * Security: UUID4 URL tokenization
+📂 Installation
+ * Clone the repo: git clone https://github.com/YOUR_USERNAME/doc-tracker.git
+ * Install requirements: pip install -r requirements.txt
+ * Migrate database: python manage.py migrate
+ * Run server: python manage.py runserver
+Developed by [Your Name]
