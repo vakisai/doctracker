@@ -1,0 +1,41 @@
+from django.db import models
+from django.contrib.auth.models import User
+import uuid
+
+class Student(models.Model):
+    counselor = models.ForeignKey(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
+    email = models.EmailField()
+    # UUID makes the student portal link secure and impossible to guess
+    access_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+    def get_progress_percentage(self):
+        """Calculates the percentage of verified documents."""
+        total = self.document_set.count()
+        if total == 0:
+            return 0
+        verified = self.document_set.filter(status='Verified').count()
+        return int((verified / total) * 100)
+
+class Document(models.Model):
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Uploaded', 'Uploaded'),
+        ('Verified', 'Verified'),
+        ('Rejected', 'Rejected'),
+    ]
+
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    name = models.CharField(max_length=200) # e.g., "Passport", "SOP"
+    file = models.FileField(upload_to='student_documents/', null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+    feedback = models.TextField(blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.student.name}"
+
