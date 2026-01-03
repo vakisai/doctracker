@@ -1,0 +1,16 @@
+from django.contrib import admin
+from .models import Student, Document
+
+class DocumentInline(admin.TabularInline):
+    model = Document
+    extra = 1
+
+@admin.register(Student)
+class StudentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'counselor', 'get_progress', 'access_token')
+    inlines = [DocumentInline]
+
+    def get_progress(self, obj):
+        return f"{obj.get_progress_percentage()}%"
+    get_progress.short_description = 'Progress'
+
