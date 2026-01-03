@@ -1,0 +1,72 @@
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
+from .models import Student, Document
+from .forms import DocumentUploadForm
+
+# Counselor Dashboard View
+@login_required
+def counselor_dashboard_view(request):
+    # Only show students assigned to the logged-in counselor
+    students = Student.objects.filter(counselor=request.user).order_by('-created_at')
+    return render(request, 'tracker/counselor_dashboard.html', {'students': students})
+
+# Detailed Student Management (Counselor Side)
+@login_required
+def student_details_view(request, student_id):
+    student = get_object_or_404(Student, id=student_id, counselor=request.user)
+    documents = student.document_set.all()
+
+    if request.method == 'POST':
+        for doc in documents:
+            new_status = request.POST.get(f'status_{doc.id}')
+            new_feedback = request.POST.get(f'feedback_{doc.id}')
+            if new_status:
+                doc.status = new_status
+                doc.feedback = new_feedback
+                doc.save()
+        return redirect('student_details', student_id=student.id)
+
+    return render(request, 'tracker/student_details.html', {'student': student, 'documents': documents})
+
+# Student Upload Portal (Public View with UUID)
+def student_upload_portal_view(request, access_token):
+    student = get_object_or_404(Student, access_token=access_token)
+    documents = student.document_set.all()
+
+    if request.method == 'POST':
+        form = DocumentUploadForm(request.POST, request.FILES, documents=documents)
+        if form.is_valid():
+            for doc in documents:
+                file_field = f'file_{doc.id}'
+                if file_field in request.FILES:
+                    doc.file = request.FILES[file_field]
+                    doc.status = 'Uploaded'
+                    doc.save()
+            return redirect('student_upload_portal', access_token=student.access_token)
+    else:
+        form = DocumentUploadForm(documents=documents)
+
+    return render(request, 'tracker/student_upload_portal.html', {
+        'student': student, 
+        'documents': documents,
+        'form': form
+    })
+
+# Auth Views
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('counselor_dashboard')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'tracker/login.html', {'form': form})
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
