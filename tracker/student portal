@@ -1,0 +1,59 @@
+{% extends 'tracker/base.html' %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl font-extrabold text-gray-900 mb-2">Hello, {{ student.name }}!</h1>
+            <p class="text-gray-500">Please complete your document checklist to proceed with your application.</p>
+        </header>
+
+        <form method="POST" enctype="multipart/form-data" class="space-y-8">
+            {% csrf_token %}
+            
+            <div class="space-y-6">
+                {% for doc in documents %}
+                <div class="p-5 rounded-xl border {% if doc.status == 'Verified' %}border-green-200 bg-green-50{% elif doc.status == 'Rejected' %}border-red-200 bg-red-50{% else %}border-gray-100 bg-gray-50{% endif %}">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="font-bold text-lg">{{ doc.name }}</h3>
+                            <span class="inline-block px-2 py-1 rounded text-xs font-bold uppercase tracking-wider
+                                {% if doc.status == 'Verified' %}bg-green-200 text-green-800
+                                {% elif doc.status == 'Uploaded' %}bg-blue-200 text-blue-800
+                                {% elif doc.status == 'Rejected' %}bg-red-200 text-red-800
+                                {% else %}bg-gray-200 text-gray-700{% endif %}">
+                                {{ doc.status }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {% if doc.feedback %}
+                    <div class="mb-4 text-sm bg-white p-3 rounded border border-red-100 text-red-600 italic">
+                        <strong>Note:</strong> {{ doc.feedback }}
+                    </div>
+                    {% endif %}
+
+                    {% if doc.status != 'Verified' %}
+                    <div class="mt-2">
+                        <input type="file" name="file_{{ doc.id }}" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    </div>
+                    {% else %}
+                    <div class="text-green-600 flex items-center gap-1 font-medium text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        Document verified and secured.
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-[0.98]">
+                Submit All Documents
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
