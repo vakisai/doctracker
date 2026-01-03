@@ -1,0 +1,6 @@
+DocTracker
+{% if user.is_authenticated %}
+Dashboard
+Logout
+{% endif %}
+{% block content %}{% endblock %}
